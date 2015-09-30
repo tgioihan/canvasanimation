@@ -18,7 +18,7 @@ public class AnimationObject extends Sprite {
         super(mPaint,null);
     }
 
-    public void update(long time){
+    public void onUpdate(long time){
         translateDeltaY(velocity*time/1000);
     }
 }

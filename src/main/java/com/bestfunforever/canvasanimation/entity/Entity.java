@@ -27,6 +27,9 @@ public abstract class Entity implements IDisposeable {
     protected int color;
     private boolean enable;
 
+    private boolean dirty;
+    private boolean childDirty;
+
     public float getTouchDelegateRank() {
         return touchDelegateRank;
     }
@@ -43,6 +46,7 @@ public abstract class Entity implements IDisposeable {
 
     public void setRotationAngel(float rotationAngel) {
         this.rotationAngel = rotationAngel;
+        dirty = true;
     }
 
     protected float rotationAngel;
@@ -140,6 +144,7 @@ public abstract class Entity implements IDisposeable {
             child.setAlpha(alpha);
         }
         mPaint.setAlpha((int) (alpha * 255));
+        dirty = true;
     }
 
     public int getColor() {
@@ -149,19 +154,23 @@ public abstract class Entity implements IDisposeable {
     public void setColor(int color) {
         this.color = color;
         mPaint.setColor(color);
+        dirty = true;
     }
 
     public void translateDeltaX(float deltaX) {
         x += deltaX;
+        dirty = true;
     }
 
     public void translateDeltaY(float deltaY) {
         y += deltaY;
+        dirty = true;
     }
 
     public void translateDelta(float deltaX, float deltaY) {
         x += deltaX;
         y += deltaY;
+        dirty = true;
     }
 
     public float getX() {
@@ -170,6 +179,7 @@ public abstract class Entity implements IDisposeable {
 
     public void setX(float x) {
         this.x = x;
+        dirty = true;
     }
 
     public float getY() {
@@ -178,14 +188,17 @@ public abstract class Entity implements IDisposeable {
 
     public void setY(float y) {
         this.y = y;
+        dirty = true;
     }
 
     public void setWidth(float width) {
         this.width = width;
+        dirty = true;
     }
 
     public void setHeight(float height) {
         this.height = height;
+        dirty = true;
     }
 
     public float getScale() {
@@ -195,11 +208,13 @@ public abstract class Entity implements IDisposeable {
     public void setScale(float scale) {
         this.scaleX = scale;
         this.scaleY = scale;
+        dirty = true;
     }
 
     public void setScale(float scaleX,float scaleY) {
         this.scaleX = scaleX;
         this.scaleY = scaleY;
+        dirty = true;
     }
 
     public float getScaleX() {
@@ -208,6 +223,7 @@ public abstract class Entity implements IDisposeable {
 
     public void setScaleX(float scaleX) {
         this.scaleX = scaleX;
+        dirty = true;
     }
 
     public float getScaleY() {
@@ -216,6 +232,7 @@ public abstract class Entity implements IDisposeable {
 
     public void setScaleY(float scaleY) {
         this.scaleY = scaleY;
+        dirty = true;
     }
 
     public int getId() {
@@ -234,7 +251,7 @@ public abstract class Entity implements IDisposeable {
         return height;
     }
 
-    public void update(long time) {
+    public boolean update(long time) {
         Iterator<BaseModifier> iter = modifiers.iterator();
         while (iter.hasNext()) {
             BaseModifier modifier = iter.next();
@@ -242,8 +259,15 @@ public abstract class Entity implements IDisposeable {
         }
         onUpdate(time);
         for (Entity entity : childs) {
-            entity.update(time);
+            childDirty = entity.update(time);
+            if(childDirty){
+                dirty = true;
+            }
         }
+        childDirty = dirty;
+        dirty = false;
+        return childDirty;
+
     }
 
     protected void onUpdate(long time) {
@@ -305,6 +329,7 @@ public abstract class Entity implements IDisposeable {
     public void setPosition(float x, float y) {
         this.x = x;
         this.y = y;
+        dirty = true;
     }
 
     public void setPositionByEntity(Entity entity) {

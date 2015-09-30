@@ -3,6 +3,7 @@ package com.bestfunforever.canvasanimation.view;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.widget.FrameLayout;
@@ -22,6 +23,8 @@ public abstract class AnimationViewGroup extends FrameLayout implements IDispose
     protected long preveousUpdate;
     protected CopyOnWriteArrayList<Entity> entities;
     private boolean isActvieAnimation;
+    private boolean dirty;
+    private boolean childDirty;
 
     protected abstract void onUpdate(long elapseTime);
     protected abstract void onInit(Context context);
@@ -67,12 +70,17 @@ public abstract class AnimationViewGroup extends FrameLayout implements IDispose
     @Override
     public void update() {
         final long elapsedTime = System.currentTimeMillis() - preveousUpdate;
-        onUpdate(elapsedTime);
         for (Entity entity : entities) {
-            entity.update(elapsedTime);
+            childDirty = entity.update(elapsedTime);
+            if(childDirty){
+                dirty = true;
+            }
         }
+        onUpdate(elapsedTime);
         preveousUpdate = System.currentTimeMillis();
-        postInvalidate();
+        if(dirty)
+            postInvalidate();
+        dirty = false;
     }
 
     @Override
@@ -114,6 +122,7 @@ public abstract class AnimationViewGroup extends FrameLayout implements IDispose
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        Log.d("", "draw");
         preDraw(canvas);
         for (Entity entity :entities){
             entity.draw(canvas);

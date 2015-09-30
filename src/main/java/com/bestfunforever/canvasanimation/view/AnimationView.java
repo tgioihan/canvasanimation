@@ -3,6 +3,7 @@ package com.bestfunforever.canvasanimation.view;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -24,6 +25,8 @@ public abstract class AnimationView extends View implements IDisposeable,IAnimat
     protected long preveousUpdate;
     protected CopyOnWriteArrayList<Entity> entities;
     protected boolean isActvieAnimation;
+    private boolean dirty;
+    private boolean childDirty;
 
     protected abstract void onUpdate(long elapseTime);
     protected abstract void onInit(Context context);
@@ -65,12 +68,18 @@ public abstract class AnimationView extends View implements IDisposeable,IAnimat
     @Override
     public void update() {
         final long elapsedTime = System.currentTimeMillis() - preveousUpdate;
-        onUpdate(elapsedTime);
+
         for (Entity entity : entities) {
-            entity.update(elapsedTime);
+            childDirty = entity.update(elapsedTime);
+            if(childDirty){
+                dirty = true;
+            }
         }
+        onUpdate(elapsedTime);
         preveousUpdate = System.currentTimeMillis();
+        if(dirty)
         postInvalidate();
+        dirty = false;
     }
 
     @Override
@@ -122,6 +131,7 @@ public abstract class AnimationView extends View implements IDisposeable,IAnimat
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        Log.d("","draw");
         preDraw(canvas);
         for (Entity entity :entities){
             entity.draw(canvas);

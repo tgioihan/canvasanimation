@@ -36,7 +36,7 @@ public class AnimateObject extends Entity {
     }
 
     @Override
-    public void update(long time) {
+    public void onUpdate(long time) {
         if(System.currentTimeMillis()-preveousUpdate >= frame){
             if(currentBitmapPosition+1<bitmaps.size()){
                 currentBitmapPosition++;
